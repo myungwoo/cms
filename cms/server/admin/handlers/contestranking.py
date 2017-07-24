@@ -38,7 +38,7 @@ import sys
 from sqlalchemy.orm import joinedload
 
 from cms.db import Contest
-from cms.grading import task_score
+from cms.grading import task_score, koi_ranking_info
 
 from .base import BaseHandler, require_permission
 
@@ -100,10 +100,13 @@ class RankingHandler(BaseHandler):
             if include_partial:
                 row.append("P")
 
+            row.append("# of submissions")
+            row.append("Last valid submission")
+
             writer.writerow(row)
 
             for p in sorted(contest.participations,
-                            key=lambda p: p.user.username):
+                            key=lambda p: koi_ranking_info(p)):
                 if p.hidden:
                     continue
 
@@ -127,6 +130,10 @@ class RankingHandler(BaseHandler):
                 row.append(round(score, contest.score_precision))
                 if include_partial:
                     row.append("*" if partial else "")
+
+                koi_ranking = koi_ranking_info(p)
+                row.append(koi_ranking[1])
+                row.append(koi_ranking[2])
 
                 if sys.version_info >= (3, 0):
                     writer.writerow(row)  # untested

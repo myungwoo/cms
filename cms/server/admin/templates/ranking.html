@@ -1,7 +1,7 @@
 {% extends base.html %}
 
 {% block core %}
-{% from cms.grading import task_score %}
+{% from cms.grading import task_score, koi_ranking_info %}
 <div class="core_title">
   <h1>Ranking</h1>
 </div>
@@ -18,10 +18,12 @@ Download as <a href="{{ url("contest", contest.id, "ranking", "csv") }}">csv</a>
       <th><a href="{{ url("task", task.id) }}">{{ task.name }}</a></th>
       {% end %}
       <th>Global</th>
+      <th># of submissions</th>
+      <th>Last valid submission</th>
     </tr>
   </thead>
   <tbody>
-    {% for p in sorted(contest.participations, key=lambda u: u.user.username) %}
+    {% for p in sorted(contest.participations, key=lambda p: koi_ranking_info(p)) %}
       {% if not p.hidden %}
     <tr>
       {% set score = 0.0 %}
@@ -43,6 +45,9 @@ Download as <a href="{{ url("contest", contest.id, "ranking", "csv") }}">csv</a>
       <td>{{ t_score }}{% if t_partial %}*{% end %}</td>
       {% end %}
       <td>{{ round(score, contest.score_precision) }}{% if partial %}*{% end %}</td>
+      {% set koi_ranking = koi_ranking_info(p) %}
+      <td>{{ koi_ranking[1] }}</td>
+      <td>{{ koi_ranking[2] }}</td>
     </tr>
       {% end %}
     {% end %}

@@ -932,3 +932,29 @@ def task_score(participation, task):
         score = max(last_score, max_tokened_score)
 
     return score, partial
+
+
+def koi_ranking_info(participation):
+    # Assume that all tasks is IOI 2013- style
+    submissions = [s for s in participation.submissions
+                   if s.official]
+    last_score = {}
+    submissions.sort(key=lambda s: s.timestamp)
+    last_valid_submission = None
+    for s in submissions:
+        # Get last score of current task
+        v = 0
+        if s.task.id in last_score:
+            v = last_score[s.task.id]
+
+        sr = s.get_result(s.task.active_dataset)
+        if sr is not None and sr.scored():
+            score = sr.score
+            if v < score:
+                v = score
+                last_valid_submission = s
+                last_score[s.task.id] = v
+    global_score = sum(last_score.itervalues())
+    return (-global_score, len(submissions),
+            last_valid_submission.timestamp
+            if last_valid_submission else None)
