@@ -287,6 +287,14 @@ class Batch(TaskType):
         for filename, digest in files_to_get.items():
             sandbox.create_file_from_storage(filename, digest)
 
+        multiprocess = job.multithreaded_sandbox
+        writable_all = False
+        set_python_path = False
+        if language.name == 'Python 3 / CPython':
+            multiprocess = True
+            writable_all = True
+            set_python_path = True
+
         # Actually performs the execution
         box_success, evaluation_success, stats = evaluation_step(
             sandbox,
@@ -296,7 +304,9 @@ class Batch(TaskType):
             writable_files=files_allowing_write,
             stdin_redirect=stdin_redirect,
             stdout_redirect=stdout_redirect,
-            multiprocess=job.multithreaded_sandbox)
+            multiprocess=multiprocess,
+            writable_all=writable_all,
+            set_python_path=set_python_path)
 
         outcome = None
         text = None

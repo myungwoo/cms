@@ -322,6 +322,15 @@ class Communication(TaskType):
 
         # Start the user submissions compiled with the stub.
         language = get_language(job.language)
+
+        multiprocess = job.multithreaded_sandbox
+        writable_all = False
+        set_python_path = False
+        if language.name == 'Python 3 / CPython':
+            multiprocess = True
+            writable_all = True
+            set_python_path = True
+
         main = self.STUB_BASENAME if self._uses_stub() else executable_filename
         processes = [None for i in indices]
         for i in indices:
@@ -353,7 +362,9 @@ class Communication(TaskType):
                 dirs_map={fifo_dir[i]: (sandbox_fifo_dir[i], "rw")},
                 stdin_redirect=stdin_redirect,
                 stdout_redirect=stdout_redirect,
-                multiprocess=job.multithreaded_sandbox)
+                multiprocess=multiprocess,
+                writable_all=writable_all,
+                set_python_path=set_python_path)
 
         # Wait for the processes to conclude, without blocking them on I/O.
         wait_without_std(processes + [manager])

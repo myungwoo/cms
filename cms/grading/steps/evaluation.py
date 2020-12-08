@@ -26,6 +26,7 @@
 """High level functions to perform standardized evaluations."""
 
 import logging
+import os
 
 from cms import config
 from cms.grading.Sandbox import Sandbox
@@ -86,7 +87,8 @@ def evaluation_step(sandbox, commands,
                     time_limit=None, memory_limit=None,
                     dirs_map=None, writable_files=None,
                     stdin_redirect=None, stdout_redirect=None,
-                    multiprocess=False):
+                    multiprocess=False, writable_all=False,
+                    set_python_path=False):
     """Execute some evaluation commands in the sandbox.
 
     Execute the commands sequentially in the (already created) sandbox, after
@@ -133,7 +135,7 @@ def evaluation_step(sandbox, commands,
         success = evaluation_step_before_run(
             sandbox, command, time_limit, memory_limit,
             dirs_map, writable_files, stdin_redirect, stdout_redirect,
-            multiprocess, wait=True)
+            multiprocess, writable_all, set_python_path, wait=True)
         if not success:
             logger.debug("Job failed in evaluation_step_before_run.")
             return False, None, None
@@ -149,7 +151,8 @@ def evaluation_step_before_run(sandbox, command,
                                time_limit=None, memory_limit=None,
                                dirs_map=None, writable_files=None,
                                stdin_redirect=None, stdout_redirect=None,
-                               multiprocess=False, wait=False):
+                               multiprocess=False, writable_all=False,
+                               set_python_path=False, wait=False):
     """First part of an evaluation step, up to the execution, included.
 
     See evaluation_step for the meaning of the common arguments. This version
@@ -161,6 +164,8 @@ def evaluation_step_before_run(sandbox, command,
     return (bool|Popen): sandbox success if wait is True, the process if not.
 
     """
+    if set_python_path:
+        sandbox.set_env['PYTHONPATH'] = os.path.expanduser('/usr/local/lib/python3.6/dist-packages')
     # Ensure parameters are appropriate.
     if time_limit is not None and time_limit <= 0:
         raise ValueError("Time limit must be positive, is %s" % time_limit)
@@ -201,7 +206,8 @@ def evaluation_step_before_run(sandbox, command,
     for name in [sandbox.stderr_file, sandbox.stdout_file]:
         if name is not None:
             writable_files.append(name)
-    sandbox.allow_writing_only(writable_files)
+    if not writable_all:
+        sandbox.allow_writing_only(writable_files)
 
     sandbox.set_multiprocess(multiprocess)
 
