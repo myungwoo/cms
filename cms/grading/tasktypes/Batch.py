@@ -299,8 +299,8 @@ class Batch(TaskType):
         box_success, evaluation_success, stats = evaluation_step(
             sandbox,
             commands,
-            job.time_limit,
-            job.memory_limit,
+            language.adjusted_time_limit(job.time_limit),
+            language.adjusted_memory_limit(job.memory_limit),
             writable_files=files_allowing_write,
             stdin_redirect=stdin_redirect,
             stdout_redirect=stdout_redirect,

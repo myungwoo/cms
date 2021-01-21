@@ -52,6 +52,14 @@ class JavaJDK(Language):
         """See Language.requires_multithreading."""
         return True
 
+    def adjusted_time_limit(self, time_limit):
+        """Adjustment to time limit(seconds) for the language"""
+        return time_limit * 2
+
+    def adjusted_memory_limit(self, memory_limit):
+        """Adjustment to memory limit(bytes) for the language"""
+        return memory_limit * 2
+
     def get_compilation_commands(self,
                                  source_filenames, executable_filename,
                                  for_evaluation=True):
