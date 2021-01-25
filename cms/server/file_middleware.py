@@ -101,7 +101,7 @@ class FileServerMiddleware:
         response = Response()
         response.status_code = 200
         response.mimetype = mimetype
-        if filename is not None:
+        if filename is not None and ".pdf" not in filename:
             response.headers.add(
                 "Content-Disposition", "attachment", filename=filename)
         response.set_etag(digest)
